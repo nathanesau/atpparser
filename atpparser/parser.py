@@ -32,13 +32,22 @@ def parseArchive(html_file):
 
     soup = BeautifulSoup(open(html_file), "html.parser")
     for tourney in soup.find_all('tr', {'class': 'tourney-result'}):
-        title_tag = tourney.find_all('span', {'class': 'tourney-title'})
-        title = strip(title_tag[0])
-        links = tourney.find_all('a')
-        for link in links: # only some links are relevant
-            href = None if 'href' not in link.attrs else link['href']
-            if href is not None and "singles" in href:
-                data.append({"title": title, "link": href})
+        try: # this parsing method works for 2019, 2018, ...
+            title_tag = tourney.find_all('span', {'class': 'tourney-title'})
+            title = strip(title_tag[0])
+            links = tourney.find_all('a')
+            for link in links: # only some links are relevant
+                href = None if 'href' not in link.attrs else link['href']
+                if href is not None and "singles" in href:
+                    data.append({"title": title, "link": href})
+        except: # this parsing method works for 2020
+            title_tag = tourney.find_next('a')
+            title = strip(title_tag)
+            links = tourney.find_all('a')
+            for link in links: # only some links are relevant
+                href = None if 'href' not in link.attrs else link['href']
+                if href is not None and "singles" in href:
+                    data.append({"title": title, "link": href})
     return data
 
 # downloads draw to "{draw_title}_{draw_year}.html"
